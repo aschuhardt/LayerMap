@@ -31,7 +31,7 @@ namespace LayerMap {
         public LayerMap(int width, int height) {
             Width = width;
             Height = height;
-            _mapConfig = new Configuration();
+            _mapConfig = Configuration.Load(Configuration.DEFAULT_SERIALIZATION_FILENAME);
             _layers = new Dictionary<uint, Layer>();
         }
 
