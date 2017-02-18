@@ -19,19 +19,19 @@ namespace LayerMap {
         private IDictionary<uint, Layer> _layers;
 
         public LayerMap(int width, int height, Configuration config)
-            : this(width, height) {
+            : this(width, height, false) {
             _mapConfig = config ?? Configuration.Load(Configuration.DEFAULT_SERIALIZATION_FILENAME);
         }
 
         public LayerMap(int width, int height, string configFilePath)
-            : this(width, height) {
+            : this(width, height, false) {
             _mapConfig = Configuration.Load(configFilePath);
         }
 
-        public LayerMap(int width, int height) {
+        public LayerMap(int width, int height, bool loadDefault = true) {
             Width = width;
             Height = height;
-            _mapConfig = Configuration.Load(Configuration.DEFAULT_SERIALIZATION_FILENAME);
+            if (loadDefault) _mapConfig = Configuration.Load(Configuration.DEFAULT_SERIALIZATION_FILENAME);
             _layers = new Dictionary<uint, Layer>();
         }
 
