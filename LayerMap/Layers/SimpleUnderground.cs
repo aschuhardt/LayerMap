@@ -1,13 +1,12 @@
-﻿using LibNoise.Primitive;
-using LibNoise.Filter;
+﻿using LayerMap.Tiles;
+using LayerMap.Utility;
+using System.Collections.Generic;
 
 namespace LayerMap.Layers {
     internal class SimpleUnderground : Layer {
-        private const float DIRT_FLOOR_COVERAGE = 0.2f;
-        private const float STONE_COVERAGE = 0.35f;
 
-        public SimpleUnderground(int width, int height)
-            : base(width, height) {
+        public SimpleUnderground(int width, int height, Configuration config)
+            : base(width, height, config) {
         }
 
         public override float AmbientTemperature {
@@ -16,44 +15,17 @@ namespace LayerMap.Layers {
             }
         }
 
-        protected override Tile[,] GenerateFeatures(int width, int height) {
+        protected override Tile[,] GenerateFeatures(int width, int height, Configuration config) {
             Tile[,] output = new Tile[width, height];
 
-            //generate dirt
-            ImprovedPerlin perlinDirt = new ImprovedPerlin();
-            MultiFractal mfDirt = new MultiFractal();
+            List<Tile[,]> featureLayers = new List<Tile[,]>();
+            featureLayers.Add(LandscapeGenerator.CreateTileDistribution<DirtWall>(width, height, 1, 1));
+            featureLayers.Add(LandscapeGenerator.CreateTileDistribution<DirtFloor>(width, height, config.Underground.TunnelScale, config.Underground.TunnelCoverage));
+            featureLayers.Add(LandscapeGenerator.CreateTileDistribution<StoneWall>(width, height, config.Underground.StoneScale, config.Underground.StoneCoverage));
+            featureLayers.Add(LandscapeGenerator.CreateTileDistribution<StoneWall>(width, height, config.Underground.StoneScale, config.Underground.StoneCoverage));
+            featureLayers.Add(LandscapeGenerator.CreateTileDistribution<OreWall>(width, height, config.Underground.OreScale, config.Underground.OreCoverage));
 
-            mfDirt.Primitive2D = perlinDirt;
-            mfDirt.Primitive3D = perlinDirt;
-
-            for (int x = 0; x < width; x++) {
-                for (int y = 0; y < height; y++) {
-                    float val = mfDirt.GetValue(x, y);
-                    if (val > DIRT_FLOOR_COVERAGE) {
-                        output[x, y] = new Tiles.DirtFloor();
-                    } else {
-                        output[x, y] = new Tiles.DirtWall();
-                    }
-                }
-            }
-
-            //generate stone
-            ImprovedPerlin perlinStone = new ImprovedPerlin();
-            MultiFractal mfStone = new MultiFractal();
-
-            mfStone.Primitive2D = perlinStone;
-            mfStone.Primitive3D = perlinStone;
-
-            for (int x = 0; x < width; x++) {
-                for (int y = 0; y < height; y++) {
-                    float val = mfStone.GetValue(x, y);
-                    if (val > DIRT_FLOOR_COVERAGE) {
-                        output[x, y] = new Tiles.DirtFloor();
-                    } else {
-                        output[x, y] = new Tiles.DirtWall();
-                    }
-                }
-            }
+            featureLayers.ForEach((f) => LandscapeGenerator.ApplyDistributionToTileArray(output, f));
 
             return output;
         }

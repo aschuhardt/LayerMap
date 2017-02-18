@@ -1,12 +1,12 @@
-﻿using LibNoise.Primitive;
-using LibNoise.Filter;
+﻿using LayerMap.Tiles;
+using LayerMap.Utility;
+using System.Collections.Generic;
 
 namespace LayerMap.Layers {
     internal class Surface : Layer {
-        private const float GRASS_COVERAGE = 0.5f;
-        
-        public Surface(int width, int height)
-            : base(width, height) {
+                
+        public Surface(int width, int height, Configuration config)
+            : base(width, height, config) {
         }
 
         public override float AmbientTemperature {
@@ -15,24 +15,13 @@ namespace LayerMap.Layers {
             }
         }
 
-        protected override Tile[,] GenerateFeatures(int width, int height) {
+        protected override Tile[,] GenerateFeatures(int width, int height, Configuration config) {
             Tile[,] output = new Tile[width, height];
-            ImprovedPerlin perlin = new ImprovedPerlin();
-            MultiFractal mf = new MultiFractal();
+            
+            List<Tile[,]> featureLayers = new List<Tile[,]>();
 
-            mf.Primitive2D = perlin;
-            mf.Primitive3D = perlin;
-
-            for (int x = 0; x < width; x++) {
-                for (int y = 0; y < height; y++) {
-                    float val = mf.GetValue(x, y);
-                    if (val > GRASS_COVERAGE) {
-                        output[x, y] = new Tiles.Grass();
-                    } else {
-                        output[x, y] = new Tiles.DirtFloor();
-                    }
-                }
-            }
+            featureLayers.Add(LandscapeGenerator.CreateTileDistribution<DirtFloor>(width, height, 1, 1));
+            featureLayers.Add(LandscapeGenerator.CreateTileDistribution<Grass>(width, height, config.Surface.GrassScale, config.Surface.GrassCoverage));
 
             return output;
         }

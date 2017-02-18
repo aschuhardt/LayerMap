@@ -29,12 +29,12 @@ namespace LayerMap {
             }
         }
 
-        protected Layer(int width, int height) {
+        protected Layer(int width, int height, Configuration config) {
             ID = Guid.NewGuid();
-            _tiles = GenerateFeatures(width, height);
+            _tiles = GenerateFeatures(width, height, config);
         }
 
-        protected abstract Tile[,] GenerateFeatures(int width, int height);
+        protected abstract Tile[,] GenerateFeatures(int width, int height, Configuration config);
 
     }
 }

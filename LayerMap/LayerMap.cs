@@ -9,6 +9,8 @@ namespace LayerMap {
     /// A collection of Layer objects accessible by an index.
     /// </summary>
     public class LayerMap {
+        private Configuration _mapConfig;
+
         public const int SURFACE_LEVEL = 0;
 
         public int Width { get; private set; }
@@ -16,9 +18,20 @@ namespace LayerMap {
 
         private IDictionary<uint, Layer> _layers;
 
+        public LayerMap(int width, int height, Configuration config)
+            : this(width, height) {
+            _mapConfig = config ?? Configuration.Load(Configuration.DEFAULT_SERIALIZATION_FILENAME);
+        }
+
+        public LayerMap(int width, int height, string configFilePath)
+            : this(width, height) {
+            _mapConfig = Configuration.Load(configFilePath);
+        }
+
         public LayerMap(int width, int height) {
             Width = width;
             Height = height;
+            _mapConfig = new Configuration();
             _layers = new Dictionary<uint, Layer>();
         }
 
@@ -36,9 +49,9 @@ namespace LayerMap {
             //eventually this might be used to create different types of layers based on their level
             //for now though we will just return a basic dummy layer
             if (level == SURFACE_LEVEL) {
-                return new Surface(Width, Height);
+                return new Surface(Width, Height, _mapConfig);
             } else {
-                return new SimpleUnderground(Width, Height);
+                return new SimpleUnderground(Width, Height, _mapConfig);
             }
         }
     }
